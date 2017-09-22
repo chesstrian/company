@@ -2,4 +2,4 @@ from django import forms
 
 
 class WorkingLetterForm(forms.Form):
-    document = forms.CharField(max_length=50)
+    document = forms.CharField(label='Documento', max_length=50)
