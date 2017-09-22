@@ -1,9 +1,12 @@
 {% extends 'bootstrap4/bootstrap4.html' %}
 
 {% load bootstrap4 %}
+{% load static %}
 
 {% block bootstrap4_content %}
   <div class="container">
+    <img id="header" src="http://{{ request.get_host }}{% static 'employee/images/header.png' %}" style="width: 100%">
+
     <h2>Carta Laboral</h2>
 
     <hr>

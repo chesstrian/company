@@ -30,7 +30,7 @@
 
 {% block content %}
   <div id="content">
-    <img id="header" src="http://{{ request.get_host }}{% static 'images/header.png' %}">
+    <img id="header" src="http://{{ request.get_host }}{% static 'employee/images/header.png' %}">
 
     <div class="letter-content">
       <p>La Estrella, {{ date }}</p>
@@ -70,6 +70,6 @@
       </p>
     </div>
 
-    <img id="footer" src="http://{{ request.get_host }}{% static 'images/footer.png' %}">
+    <img id="footer" src="http://{{ request.get_host }}{% static 'employee/images/footer.png' %}">
   </div>
 {% endblock %}
