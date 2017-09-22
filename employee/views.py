@@ -15,9 +15,6 @@ class WorkingLetterView(FormView):
     success_url = '.'
 
     def form_valid(self, form):
-        import locale
-        locale.setlocale(locale.LC_TIME, "es_CO.utf8")
-
         today = datetime.today()
         context = dict(
             date=today.strftime('%d de %B de %Y'),
