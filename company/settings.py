@@ -85,7 +85,40 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+    },
+    'cambridge': {
+        'ENGINE': 'sql_server.pyodbc',
+        'NAME': 'CAMBRIDG13',
+        'USER': 'intranet',
+        'PASSWORD': 'Humax2017*',
+        'HOST': '181.143.9.58',
+        'PORT': '1433',
+        'OPTIONS': {
+            'host_is_server': True,
+        },
+    },
+    'farmatech': {
+        'ENGINE': 'sql_server.pyodbc',
+        'NAME': 'FARMATECH',
+        'USER': 'intranet',
+        'PASSWORD': 'Humax2017*',
+        'HOST': '181.143.9.58',
+        'PORT': '1433',
+        'OPTIONS': {
+            'host_is_server': True,
+        },
+    },
+    'humax': {
+        'ENGINE': 'sql_server.pyodbc',
+        'NAME': 'HUMAX13',
+        'USER': 'intranet',
+        'PASSWORD': 'Humax2017*',
+        'HOST': '181.143.9.58',
+        'PORT': '1433',
+        'OPTIONS': {
+            'host_is_server': True,
+        },
+    },
 }
 
 

@@ -42,11 +42,11 @@
       <br><br><br><br>
 
       <p style="text-align:justify;line-height:25px;">
-        Hacemos constar que el/la señor(a) <strong style="text-transform: uppercase">{{ name }}</strong>, identificado(a) con
-        cédula de ciudadanía número {{ document }}, labora con nuestra empresa desde el {{ date_start }}, con contrato a
-        {{ contract_type }}, desempeña el cargo de <strong style="text-transform: uppercase">{{ position }}</strong>, devenga
-        un salario básico mensual de ${{ salary }} un promedio de comisiones mensuales de ${{ comission }} mas un auxilio
-        de alimentación grupo familiar mensual de ${{ assistance }} no constitutivo de salario.
+        Hacemos constar que el/la señor(a) <strong>{{ name }}</strong>, identificado(a) con cédula de ciudadanía número
+        {{ document }}, labora con nuestra empresa desde el {{ date_start }}, con contrato a {{ contract_type }},
+        desempeña el cargo de <strong>{{ position }}</strong>, devenga un salario básico mensual de ${{ salary }}, un
+        promedio de comisiones mensuales de ${{ comission }} mas un auxilio de alimentación grupo familiar mensual de
+        ${{ assistance }} no constitutivo de salario.
       </p>
 
       <br>

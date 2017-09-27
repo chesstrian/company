@@ -11,6 +11,8 @@
 
     <hr>
 
+    {% bootstrap_messages %}
+
     <form method="post" role="form" class="form">
       {% csrf_token %}
       {% bootstrap_form form %}
