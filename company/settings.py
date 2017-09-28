@@ -157,3 +157,5 @@ USE_TZ = True
 
 STATIC_ROOT = '/var/www/html/static/'
 STATIC_URL = '/static/'
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

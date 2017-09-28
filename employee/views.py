@@ -71,18 +71,23 @@ class WorkingLetterView(FormView):
                 date_start="{} de {} de {}".format(date_start.day, months[date_start.month -1 ], date_start.year),
                 contract_type=contract_types[rows[0]['Tipo_Contrato'].strip()],
                 position=rows[0]['Nombre_Cargo'].strip(),
+                salary=0,
+                assistance=0,
+                comission=0
             )
 
             for row in rows:
-                # comission not found yet
                 concept = row['Nombre_Concepto'].strip()
                 if concept == 'SALARIO BASICO':
-                    result['salary'] = "{:,.2f}".format(row['Devengado']).replace(',', '.')
-                elif concept == 'SUBSIDIO TRANSPORTE':
-                    result['assistance'] = "{:,.2f}".format(row['Devengado']).replace(',', '.')  # Not found on DB
+                    result['salary'] += row['Devengado']
+                elif concept == 'BENEFICIO DE ALIMENTACION GF':
+                    result['assistance'] += row['Devengado']
+                elif concept in ('COMISIONES POR RECAUDO', 'COMISIONES POR VENTAS'):
+                    result['comission'] += row['Devengado']
 
-            if not 'comission' in result:
-                result['comission'] = "{:,.2f}".format(0).replace(',', '.')
+            result['salary'] = "{:,.2f}".format(result['salary']).replace(',', '.')
+            result['assistance'] = "{:,.2f}".format(result['assistance']).replace(',', '.')
+            result['comission'] = "{:,.2f}".format(result['comission']).replace(',', '.')
 
             return result
 
