@@ -5,12 +5,6 @@
 
 {% block bootstrap4_content %}
   <div class="container">
-    <img id="header" src="http://{{ request.get_host }}{% static 'employee/images/header.png' %}" style="width: 100%">
-
-    <h2>Carta Laboral</h2>
-
-    <hr>
-
     {% bootstrap_messages %}
 
     <form method="post" role="form" class="form">
