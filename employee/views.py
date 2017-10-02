@@ -5,12 +5,14 @@ from datetime import datetime
 
 from django.contrib import messages
 from django.db import connections
+from django.utils.decorators import method_decorator
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic.edit import FormView
 from easy_pdf.rendering import render_to_pdf_response
 
 from employee.forms import WorkingLetterForm
 
-
+@method_decorator(xframe_options_exempt, name='dispatch')
 class WorkingLetterView(FormView):
     template_name = 'employee/working-letter.tpl'
     form_class = WorkingLetterForm
@@ -20,8 +22,10 @@ class WorkingLetterView(FormView):
         def get_initial_date():
             today = datetime.today()
             day = 1 if today.day > 15 else 16
+            month = today.month if today.day > 15 else today.month - 1
+            # TODO: Check for year
 
-            return today.replace(day=day, hour=0, minute=0, second=0, microsecond=0)
+            return today.replace(month=month, day=day, hour=0, minute=0, second=0, microsecond=0)
 
         def dict_fetchall(cursor):
             columns = [col[0] for col in cursor.description]
