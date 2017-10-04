@@ -9,6 +9,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.clickjacking import xframe_options_exempt
 from django.views.generic.edit import FormView
 from easy_pdf.rendering import render_to_pdf_response
+from functools import reduce
 
 from employee.forms import WorkingLetterForm
 
@@ -34,9 +35,9 @@ class WorkingLetterView(FormView):
                 for row in cursor.fetchall()
             ]
 
-        def get_rows(document, initial_date):
+        def get_rows(view, document, initial_date):
             databases = ('cambridge', 'farmatech', 'humax')
-            sql = "SELECT * FROM vPcarta WHERE Empleado = %s AND Inicial = %s", [document, initial_date]
+            sql = "SELECT * FROM {} WHERE Empleado = %s AND Inicial = %s".format(view), [document, initial_date]
 
             for db in databases:
                 cursor = connections[db].cursor()
@@ -50,8 +51,8 @@ class WorkingLetterView(FormView):
                 return rows
             return dict()
 
-        def get_pdf_context(document, initial_date):
-            rows = get_rows(document, initial_date)
+        def get_context_letter(document, initial_date):
+            rows = get_rows('vPcarta', document, initial_date)
 
             if not rows:
                 return dict()
@@ -68,7 +69,7 @@ class WorkingLetterView(FormView):
             }
 
             date_start = rows[0]['Ingreso_Emplea']
-            result = dict(
+            context = dict(
                 date="{} de {} de {}".format(today.day, months[today.month - 1], today.year),
                 name=rows[0]['Nombre_Empleado'].strip(),
                 document="{:,}".format(int(document)).replace(',', '.'),
@@ -83,22 +84,57 @@ class WorkingLetterView(FormView):
             for row in rows:
                 concept = row['Nombre_Concepto'].strip()
                 if concept == 'BENEFICIO DE ALIMENTACION GF':
-                    result['assistance'] += row['Devengado']
+                    context['assistance'] += row['Devengado']
                 elif concept in ('COMISIONES POR RECAUDO', 'COMISIONES POR VENTAS'):
-                    result['comission'] += row['Devengado']
+                    context['comission'] += row['Devengado']
 
-            result['salary'] = "{:,.2f}".format(result['salary']).replace(',', '.')
-            result['assistance'] = "{:,.2f}".format(result['assistance'] * 2).replace(',', '.')
-            result['comission'] = "{:,.2f}".format(result['comission']).replace(',', '.')
+            context['salary'] = "{:,.2f}".format(context['salary']).replace(',', '.')
+            context['assistance'] = "{:,.2f}".format(context['assistance'] * 2).replace(',', '.')
+            context['comission'] = "{:,.2f}".format(context['comission']).replace(',', '.')
 
-            return result
+            return context
 
-        context = get_pdf_context(form.cleaned_data['document'], get_initial_date())
+        def get_context_bill(document, initial_date):
+            rows = get_rows('vPcolilla', document, initial_date)
+
+            if not rows:
+                return dict()
+
+            today = datetime.today()
+
+            context = dict(
+                name=rows[0]['Nombre_Empleado'].strip(),
+                position=rows[0]['Nombre_Cargo'].strip(),
+                lapse=rows[0]['Inicial'].strftime("%Y.%m.%d") + " al " + rows[0]['Final'].strftime("%Y.%m.%d"),
+                document=document,
+                salary="{:,.2f}".format(rows[0]['Basico']),
+                dependency=rows[0]['Nombre_Dependencia'].strip(),
+                date=today.strftime("%Y.%m.%d"),
+                bank=rows[0]['Nombre_Banco'].strip(),
+                days=rows[0]['Dias'],
+                rows=rows,
+                total_income=reduce(lambda x, y: x + y['Devengado'], rows, 0),
+                total_deducted=reduce(lambda x, y: x + y['Deducido'], rows, 0),
+            )
+
+            context['to_pay'] = context['total_income'] + context['total_deducted']
+
+            return context
+
+        action = self.request.POST.get('action')
+        context = template = None
+
+        if action == 'letter':
+            template = 'employee/working-letter-pdf.tpl'
+            context = get_context_letter(form.cleaned_data['document'], get_initial_date())
+        elif action == 'bill':
+            template = 'employee/pay-bill-pdf.tpl'
+            context = get_context_bill(form.cleaned_data['document'], get_initial_date())
 
         if context:
             return render_to_pdf_response(
                 request=self.request,
-                template='employee/working-letter-pdf.tpl',
+                template=template,
                 context=context
             )
         else:
