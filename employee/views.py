@@ -128,19 +128,22 @@ class WorkingLetterView(FormView):
             return context
 
         action = self.request.POST.get('action')
-        context = template = None
+        context = template = filename = None
 
         if action == 'letter':
             template = 'employee/working-letter-pdf.tpl'
             context = get_context_letter(form.cleaned_data['document'], get_initial_date())
+            filename = form.cleaned_data['document'] + '-carta.pdf'
         elif action == 'bill':
             template = 'employee/pay-bill-pdf.tpl'
             context = get_context_bill(form.cleaned_data['document'], get_initial_date())
+            filename = form.cleaned_data['document'] + '-colilla.pdf'
 
         if context:
             return render_to_pdf_response(
                 request=self.request,
                 template=template,
+                download_filename=filename,
                 context=context
             )
         else:
