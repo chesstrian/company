@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.db import connections
 from django.utils.decorators import method_decorator
 from django.views.decorators.clickjacking import xframe_options_exempt
+from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.edit import FormView
 from easy_pdf.rendering import render_to_pdf_response
 from functools import reduce
@@ -14,6 +15,7 @@ from functools import reduce
 from employee.forms import WorkingLetterForm
 
 @method_decorator(xframe_options_exempt, name='dispatch')
+@method_decorator(csrf_exempt, name='dispatch')
 class WorkingLetterView(FormView):
     template_name = 'employee/working-letter.tpl'
     form_class = WorkingLetterForm
