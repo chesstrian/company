@@ -127,8 +127,8 @@
   <div id="content">
     <div>
       <div class="block title-left">
-        <h2>FARMATECH S.A.</h2>
-        <h3>NIT. 900090839-1</h3>
+        <h2>{{ company|upper }} S.A.</h2>
+        <h3>NIT. {{ nit }}</h3>
       </div>
       <div class="block title-right">
         <h2>COMPROBANTE<br> DE NÓMINA</h2>

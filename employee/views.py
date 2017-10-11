@@ -48,11 +48,11 @@ class WorkingLetterView(FormView):
                 if not rows:
                     continue
 
-                return rows
-            return dict()
+                return rows, db
+            return dict(), None
 
         def get_context_letter(document, initial_date):
-            rows = get_rows('vPcarta', document, initial_date)
+            rows, db = get_rows('vPcarta', document, initial_date)
 
             if not rows:
                 return dict()
@@ -88,14 +88,16 @@ class WorkingLetterView(FormView):
                 elif concept in ('COMISIONES POR RECAUDO', 'COMISIONES POR VENTAS'):
                     context['comission'] += row['Devengado']
 
-            context['salary'] = "{:,.2f}".format(context['salary']).replace(',', '.')
-            context['assistance'] = "{:,.2f}".format(context['assistance'] * 2).replace(',', '.')
-            context['comission'] = "{:,.2f}".format(context['comission']).replace(',', '.')
-
             return context
 
         def get_context_bill(document, initial_date):
-            rows = get_rows('vPcolilla', document, initial_date)
+            rows, db = get_rows('vPcolilla', document, initial_date)
+
+            nits = dict(
+                cambridge='900348955-8',
+                farmatech='900090839-1',
+                humax='811038881-9'
+            )
 
             if not rows:
                 return dict()
@@ -103,6 +105,8 @@ class WorkingLetterView(FormView):
             today = datetime.today()
 
             context = dict(
+                company=db,
+                nit=nits[db],
                 name=rows[0]['Nombre_Empleado'].strip(),
                 position=rows[0]['Nombre_Cargo'].strip(),
                 lapse=rows[0]['Inicial'].strftime("%Y.%m.%d") + " al " + rows[0]['Final'].strftime("%Y.%m.%d"),

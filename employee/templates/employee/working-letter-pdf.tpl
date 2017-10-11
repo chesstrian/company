@@ -1,5 +1,6 @@
 {% extends "easy_pdf/base.html" %}
 
+{% load humanize %}
 {% load static %}
 
 {% block extra_style %}
@@ -17,6 +18,10 @@
             font-size: 15px;
         }
 
+        #sign {
+          width: 200px;
+        }
+
         #footer {
             position: fixed;
             bottom: 0;
@@ -30,7 +35,7 @@
 
 {% block content %}
   <div id="content">
-    <img id="header" src="http://{{ request.get_host }}{% static 'employee/images/header.png' %}">
+    <img id="header" src="https://{{ request.get_host }}{% static 'employee/images/header.png' %}">
 
     <div class="letter-content">
       <p>La Estrella, {{ date }}</p>
@@ -44,9 +49,10 @@
       <p style="text-align:justify;line-height:25px;">
         Hacemos constar que el/la señor(a) <strong>{{ name }}</strong>, identificado(a) con cédula de ciudadanía número
         {{ document }}, labora con nuestra empresa desde el {{ date_start }}, con contrato a {{ contract_type }},
-        desempeña el cargo de <strong>{{ position }}</strong>, devenga un salario básico mensual de ${{ salary }}, un
-        promedio de comisiones mensuales de ${{ comission }} mas un auxilio de alimentación grupo familiar mensual de
-        ${{ assistance }} no constitutivo de salario.
+        desempeña el cargo de <strong>{{ position }}</strong>, devenga un salario básico mensual de
+        ${{ salary|floatformat:2|intcomma }}{% if comission > 0 %}, un promedio de comisiones mensuales de
+        ${{ comission|floatformat:2|intcomma }}{% endif %}{% if assistance > 0 %} mas un auxilio de alimentación grupo
+        familiar mensual de ${{ assistance|floatformat:2|intcomma }} no constitutivo de salario{% endif %}.
       </p>
 
       <br>
@@ -63,13 +69,14 @@
 
       <br><br><br><br>
 
+      <img id="sign" src="https://{{ request.get_host }}{% static 'employee/images/diana.png' %}">
       <p>
-        <strong>MONICA MARIA DUQUE SEPULVEDA</strong>
+        <strong>DIANA CATALINA JARAMILLO</strong>
         <br>
         Gerente de Gestión Humana
       </p>
     </div>
 
-    <img id="footer" src="http://{{ request.get_host }}{% static 'employee/images/footer.png' %}">
+    <img id="footer" src="https://{{ request.get_host }}{% static 'employee/images/footer.png' %}">
   </div>
 {% endblock %}
