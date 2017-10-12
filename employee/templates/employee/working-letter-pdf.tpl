@@ -2,6 +2,7 @@
 
 {% load humanize %}
 {% load static %}
+{% load pay_bill %}
 
 {% block extra_style %}
     <style type="text/css">
@@ -48,11 +49,12 @@
 
       <p style="text-align:justify;line-height:25px;">
         Hacemos constar que el/la señor(a) <strong>{{ name }}</strong>, identificado(a) con cédula de ciudadanía número
-        {{ document }}, labora con nuestra empresa desde el {{ date_start }}, con contrato a {{ contract_type }},
-        desempeña el cargo de <strong>{{ position }}</strong>, devenga un salario básico mensual de
-        ${{ salary|floatformat:2|intcomma }}{% if comission > 0 %}, un promedio de comisiones mensuales de
+        {{ document }}, labora en <strong>{{ company|upper }} S.A</strong> con número de Nit: <strong>{{ nit }}</strong>,
+        desde el {{ date_start }}, con contrato a {{ contract_type }}, desempeña el cargo de
+        <strong>{{ position }}</strong>, devenga un salario básico mensual de ${{ salary|floatformat:2|intcomma }}
+        ({{ salary|num_2_words }}){% if comission > 0 %}, un promedio de comisiones mensuales de
         ${{ comission|floatformat:2|intcomma }}{% endif %}{% if assistance > 0 %} mas un auxilio de alimentación grupo
-        familiar mensual de ${{ assistance|floatformat:2|intcomma }} no constitutivo de salario{% endif %}.
+        familiar mensual de ${{ assistance|floatformat:2|intcomma }}{% endif %}.
       </p>
 
       <br>

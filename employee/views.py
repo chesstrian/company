@@ -53,6 +53,12 @@ class WorkingLetterView(FormView):
                 return rows, db
             return dict(), None
 
+        nits = dict(
+            cambridge='900348955-8',
+            farmatech='900090839-1',
+            humax='811038881-9'
+        )
+
         def get_context_letter(document, initial_date):
             rows, db = get_rows('vPcarta', document, initial_date)
 
@@ -72,6 +78,8 @@ class WorkingLetterView(FormView):
 
             date_start = rows[0]['Ingreso_Emplea']
             context = dict(
+                company=db,
+                nit=nits[db],
                 date="{} de {} de {}".format(today.day, months[today.month - 1], today.year),
                 name=rows[0]['Nombre_Empleado'].strip(),
                 document="{:,}".format(int(document)).replace(',', '.'),
@@ -90,16 +98,12 @@ class WorkingLetterView(FormView):
                 elif concept in ('COMISIONES POR RECAUDO', 'COMISIONES POR VENTAS'):
                     context['comission'] += row['Devengado']
 
+            context['assistance'] *= 2
+
             return context
 
         def get_context_bill(document, initial_date):
             rows, db = get_rows('vPcolilla', document, initial_date)
-
-            nits = dict(
-                cambridge='900348955-8',
-                farmatech='900090839-1',
-                humax='811038881-9'
-            )
 
             if not rows:
                 return dict()
