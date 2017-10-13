@@ -53,8 +53,9 @@
         desde el {{ date_start }}, con contrato a {{ contract_type }}, desempeña el cargo de
         <strong>{{ position }}</strong>, devenga un salario básico mensual de ${{ salary|floatformat:2|intcomma }}
         ({{ salary|num_2_words }}){% if comission > 0 %}, un promedio de comisiones mensuales de
-        ${{ comission|floatformat:2|intcomma }}{% endif %}{% if assistance > 0 %} mas un auxilio de alimentación grupo
-        familiar mensual de ${{ assistance|floatformat:2|intcomma }}{% endif %}.
+        ${{ comission|floatformat:2|intcomma }} ({{ comission|num_2_words }}){% endif %}{% if assistance > 0 %} mas un
+        auxilio de alimentación grupo familiar mensual de ${{ assistance|floatformat:2|intcomma }}
+        ({{ assistance|num_2_words }}){% endif %}.
       </p>
 
       <br>
