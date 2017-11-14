@@ -59,6 +59,14 @@ class WorkingLetterView(FormView):
             humax='811038881-9'
         )
 
+        def get_commission(document, db):
+            sql = "SELECT * FROM v_PromediosNomina WHERE Codigo = %s", [document]
+
+            cursor = connections[db].cursor()
+            cursor.execute(*sql)
+
+            return dict_fetchall(cursor)
+
         def get_context_letter(document, initial_date):
             rows, db = get_rows('vPcarta', document, initial_date)
 
@@ -76,6 +84,11 @@ class WorkingLetterView(FormView):
                 'INDEF': 'Término Indefinido'
             }
 
+            try:
+                comission = get_commission(document, db)[0]['PR_COMISION']
+            except IndexError:
+                comission = 0
+
             date_start = rows[0]['Ingreso_Emplea']
             context = dict(
                 company=db,
@@ -88,15 +101,13 @@ class WorkingLetterView(FormView):
                 position=rows[0]['Nombre_Cargo'].strip(),
                 salary=rows[0]['Basico'],
                 assistance=0,
-                comission=0
+                comission=comission
             )
 
             for row in rows:
                 concept = row['Nombre_Concepto'].strip()
                 if concept == 'BENEFICIO DE ALIMENTACION GF':
                     context['assistance'] += row['Devengado']
-                elif concept in ('COMISIONES POR RECAUDO', 'COMISIONES POR VENTAS'):
-                    context['comission'] += row['Devengado']
 
             context['assistance'] *= 2
 
