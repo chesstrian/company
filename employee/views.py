@@ -14,6 +14,7 @@ from functools import reduce
 
 from employee.forms import WorkingLetterForm
 
+
 @method_decorator(xframe_options_exempt, name='dispatch')
 @method_decorator(csrf_exempt, name='dispatch')
 class WorkingLetterView(FormView):
@@ -22,24 +23,9 @@ class WorkingLetterView(FormView):
     success_url = '.'
 
     def form_valid(self, form):
-        def get_initial_date():
-            today = datetime.today()
-            day = 1 if today.day > 15 else 16
-            month = today.month if today.day > 15 else today.month - 1
-            # TODO: Check for year
-
-            return today.replace(month=month, day=day, hour=0, minute=0, second=0, microsecond=0)
-
-        def dict_fetchall(cursor):
-            columns = [col[0] for col in cursor.description]
-            return [
-                dict(zip(columns, row))
-                for row in cursor.fetchall()
-            ]
-
-        def get_rows(view, document, initial_date):
+        def get_initial_date(view, document):
             databases = ('cambridge', 'farmatech', 'humax')
-            sql = "SELECT * FROM {} WHERE Empleado = %s AND Inicial = %s".format(view), [document, initial_date]
+            sql = "SELECT TOP 1 * FROM {} WHERE Empleado = %s ORDER BY Inicial DESC".format(view), [document]
 
             for db in databases:
                 cursor = connections[db].cursor()
@@ -50,14 +36,31 @@ class WorkingLetterView(FormView):
                 if not rows:
                     continue
 
-                return rows, db
-            return dict(), None
+                return rows[0]['Inicial'], db
+
+            return None, ''
+
+        def dict_fetchall(cursor):
+            columns = [col[0] for col in cursor.description]
+            return [
+                dict(zip(columns, row))
+                for row in cursor.fetchall()
+            ]
+
+        def get_rows(view, document, initial_date, db):
+            sql = "SELECT * FROM {} WHERE Empleado = %s AND Inicial = %s".format(view), [document, initial_date]
+
+            cursor = connections[db].cursor()
+            cursor.execute(*sql)
+
+            return dict_fetchall(cursor)
 
         nits = dict(
             cambridge='900348955-8',
             farmatech='900090839-1',
             humax='811038881-9'
         )
+
 
         def get_commission(document, db):
             sql = "SELECT * FROM v_PromediosNomina WHERE Codigo = %s", [document]
@@ -67,8 +70,9 @@ class WorkingLetterView(FormView):
 
             return dict_fetchall(cursor)
 
-        def get_context_letter(document, initial_date):
-            rows, db = get_rows('vPcarta', document, initial_date)
+
+        def get_context_letter(document, initial_date, db):
+            rows = get_rows('vPcarta', document, initial_date, db)
 
             if not rows:
                 return dict()
@@ -96,7 +100,7 @@ class WorkingLetterView(FormView):
                 date="{} de {} de {}".format(today.day, months[today.month - 1], today.year),
                 name=rows[0]['Nombre_Empleado'].strip(),
                 document="{:,}".format(int(document)).replace(',', '.'),
-                date_start="{} de {} de {}".format(date_start.day, months[date_start.month -1 ], date_start.year),
+                date_start="{} de {} de {}".format(date_start.day, months[date_start.month - 1], date_start.year),
                 contract_type=contract_types[rows[0]['Tipo_Contrato'].strip()],
                 position=rows[0]['Nombre_Cargo'].strip(),
                 salary=rows[0]['Basico'],
@@ -113,8 +117,8 @@ class WorkingLetterView(FormView):
 
             return context
 
-        def get_context_bill(document, initial_date):
-            rows, db = get_rows('vPcolilla', document, initial_date)
+        def get_context_bill(document, initial_date, db):
+            rows = get_rows('vPcolilla', document, initial_date, db)
 
             if not rows:
                 return dict()
@@ -144,15 +148,22 @@ class WorkingLetterView(FormView):
 
         action = self.request.POST.get('action')
         context = template = filename = None
+        document = form.cleaned_data['document']
+        db_view = 'vPcarta' if action == 'letter' else 'vPcolilla'
+        initial_date, db = get_initial_date(db_view, document)
+
+        if initial_date is None:
+            messages.add_message(self.request, messages.ERROR, 'Su cédula no se encuentra registrada, recuerde ingresarla sin puntos')
+            return self.render_to_response(self.get_context_data())
 
         if action == 'letter':
             template = 'employee/working-letter-pdf.tpl'
-            context = get_context_letter(form.cleaned_data['document'], get_initial_date())
-            filename = form.cleaned_data['document'] + '-carta.pdf'
+            context = get_context_letter(document, initial_date, db)
+            filename = document + '-carta.pdf'
         elif action == 'bill':
             template = 'employee/pay-bill-pdf.tpl'
-            context = get_context_bill(form.cleaned_data['document'], get_initial_date())
-            filename = form.cleaned_data['document'] + '-colilla.pdf'
+            context = get_context_bill(document, initial_date, db)
+            filename = document + '-colilla.pdf'
 
         if context:
             return render_to_pdf_response(
